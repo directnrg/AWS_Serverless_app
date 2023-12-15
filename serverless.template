@@ -1,0 +1,113 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "An AWS Serverless Application.",
+  "Resources": {
+    "VerifyFileContentTypeFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "FabianSoto_Lab4::FabianSoto_Lab4.StepFunctionTasks::VerifyFileContentType",
+        "Role": "arn:aws:iam::085393644146:role/Lambda-Execute-lab4",
+        "Runtime": "dotnet6",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Code": {
+          "S3Bucket": "",
+          "S3Key": ""
+        }
+      }
+    },
+    "DetectLabelsFunction":  {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "FabianSoto_Lab4::FabianSoto_Lab4.StepFunctionTasks::DetectLabels",
+        "Role": "arn:aws:iam::085393644146:role/Lambda-Execute-lab4",
+        "Runtime": "dotnet6",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Code": {
+          "S3Bucket": "",
+          "S3Key": ""
+        }
+      }
+    },
+    "GenerateThumbnailFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "FabianSoto_Lab4::FabianSoto_Lab4.StepFunctionTasks::GenerateThumbnail",
+        "Role": "arn:aws:iam::085393644146:role/Lambda-Execute-lab4",
+        "Runtime": "dotnet6",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Code": {
+          "S3Bucket": "",
+          "S3Key": ""
+        }
+      }
+    },
+    "SaveToDynamoDBFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "FabianSoto_Lab4::FabianSoto_Lab4.StepFunctionTasks::SaveToDynamoDB",
+        "Role": "arn:aws:iam::085393644146:role/Lambda-Execute-lab4",
+        "Runtime": "dotnet6",
+        "MemorySize": 256,
+        "Timeout": 30,
+        "Code": {
+          "S3Bucket": "",
+          "S3Key": ""
+        }
+      }
+    },
+    "StateMachine": {
+      "Type": "AWS::StepFunctions::StateMachine",
+      "Properties": {
+        "RoleArn": {
+          "Fn::GetAtt": [
+            "StateMachineRole",
+            "Arn"
+          ]
+        },
+        "DefinitionString": {
+          "Fn::Sub": "file://state-machine.json"
+        }
+      }
+    },
+    
+    "StateMachineRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "states.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "StateMachinePolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "lambda:InvokeFunction"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {}
+}

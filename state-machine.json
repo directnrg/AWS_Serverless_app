@@ -1,0 +1,62 @@
+{
+  "Comment": "Image Processing State Machine",
+  "StartAt": "VerifyFileContentType",
+  "States": {
+    "VerifyFileContentType": {
+      "Type": "Task",
+      "Resource": "${VerifyFileContentTypeFunction.Arn}",
+      "Next": "IsImageChoice"
+    },
+    "IsImageChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.IsImage",
+          "BooleanEquals": true,
+          "Next": "ParallelProcessing"
+        },
+        {
+          "Variable": "$.IsImage",
+          "BooleanEquals": false,
+          "Next": "EndProcess"
+        }
+      ]
+    },
+    "ParallelProcessing": {
+      "Type": "Parallel",
+      "Next": "SaveToDynamoDB",
+      "Branches": [
+        {
+          "StartAt": "GenerateThumbnail",
+          "States": {
+            "GenerateThumbnail": {
+              "Type": "Task",
+              "Resource": "${GenerateThumbnailFunction.Arn}",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "DetectLabels",
+          "States": {
+            "DetectLabels": {
+              "Type": "Task",
+              "Resource": "${DetectLabelsFunction.Arn}",
+              "End": true
+            }
+          }
+        }
+      ]
+    },
+    "SaveToDynamoDB": {
+      "Type": "Task",
+      "Resource": "${SaveToDynamoDBFunction.Arn}",
+      "End": true
+    },
+    "EndProcess": {
+      "Type": "Pass",
+      "Result": "Process complete. The file is not an image.",
+      "End": true
+    }
+  }
+}
